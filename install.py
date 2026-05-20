@@ -43,7 +43,6 @@ elif major_platform == "Linux" and "ubuntu" not in linux_distro:
 	os.system(f"sudo rpm -Uvh {source_dir}/omf/static/gridlabd-4.0.0-1.el6.x86_64.rpm")
 	os.system(f"{sys.executable} -m pip install --upgrade pip")
 	os.system(f"{sys.executable} -m pip install -r {source_dir}/requirements.txt")
-	os.system(f"{sys.executable} -m pip install --ignore-installed six")
 	os.system(f"{sys.executable} -m pip install -e {source_dir}")
 	os.system(f'sudo chmod 755 {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run && sudo {source_dir}/omf/solvers/opendss/opendsscmd-1.7.4-linux-x64-installer.run --mode unattended')
     # - If using Docker, this configuration should be done in the Dockerfile
