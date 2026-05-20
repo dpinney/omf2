@@ -1091,7 +1091,7 @@ def duplicateModel(owner, modelName):
 	# Remove transient PID and error files so the duplicate doesn't appear
 	# "running" and cancelling it won't kill the original model's process.
 	for name in ['ZPID.txt', 'APID.txt', 'NPID.txt', 'CPID.txt', 'WPID.txt', 'TPPID.txt', 'PPID.txt',
-			'gridError.txt', 'error.txt', 'weatherError.txt', 'matError.txt', 'rawError.txt']:
+			'gridError.txt', 'error.txt', 'weatherError.txt', 'matError.txt', 'rawError.txt', 'cgmesError.txt']:
 		p = os.path.join(destination_path, name)
 		if os.path.isfile(p):
 			os.remove(p)
@@ -1386,7 +1386,7 @@ def checkConversion(modelName, owner):
 	"""
 	print(modelName)
 	# First check for error files
-	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt', 'matError.txt', 'rawError.txt']:
+	for filename in ['gridError.txt', 'error.txt', 'weatherError.txt', 'matError.txt', 'rawError.txt', 'cgmesError.txt']:
 		filepath = path_manager.join('data', 'Model', owner, modelName, filename)
 		if os.path.isfile(filepath):
 			with locked_open(filepath) as f:
@@ -1562,6 +1562,59 @@ def _raw_import_background(owner, modelName, networkName, networkNum):
 		filepath = path_manager.join('data', 'Model', owner, modelName, 'rawError.txt')
 		with locked_open(filepath, 'w') as errorFile:
 			errorFile.write('octaveError')
+	finally:
+		os.remove(pid_filepath)
+
+
+@app.route("/cgmesImport/<owner>", methods=["POST"])
+@login_required
+@write_permission_function
+def cgmesImport(owner):
+	''' API for importing a CGMES/CIM network via pandapower. '''
+	modelName = request.form.get('modelName', '')
+	model_dir = path_manager.join('data', 'Model', owner, modelName)
+	con_file_path = path_manager.join('data', 'Model', owner, modelName, 'ZPID.txt')
+	error_paths = [path_manager.join('data', 'Model', owner, modelName, filename) for filename in ('matError.txt', 'rawError.txt', 'cgmesError.txt')]
+	for filename in _safe_list_dir(model_dir):
+		if filename.endswith(".zip"):
+			os.remove(os.path.join(model_dir, filename))
+	for error_path in error_paths:
+		if os.path.isfile(error_path):
+			os.remove(error_path)
+	with locked_open(con_file_path, 'w') as conFile:
+		conFile.write("WORKING")
+	networkName = secure_filename(str(request.form.get('networkNameC', 'network1'))) or 'network'
+	networkNum = secure_filename(str(request.form.get("networkNum", '1'))) or '1'
+	if os.path.isfile(path_manager.join('data', 'Model', owner, modelName, networkName + '.omt')):
+		return 'Name already exists', 409
+	network_filepath = path_manager.join('data', 'Model', owner, modelName, 'import_cgmes.zip')
+	request.files['cgmesFile'].save(network_filepath)
+	importProc = Process(target=_cgmes_import_background, args=[owner, modelName, networkName, networkNum])
+	importProc.start()
+	return 'Success'
+
+
+def _cgmes_import_background(owner, modelName, networkName, networkNum):
+	''' Function to run in the background for CGMES import. '''
+	model_dir = path_manager.join('data', 'Model', owner, modelName)
+	network_filepath = path_manager.join('data', 'Model', owner, modelName, 'import_cgmes.zip')
+	pid_filepath = path_manager.join('data', 'Model', owner, modelName, 'ZPID.txt')
+	new_network_filepath = path_manager.join('data', 'Model', owner, modelName, networkName + '.omt')
+	try:
+		newNet = transmission.parseCgmes(network_filepath, filePath=True)
+		transmission.layout(newNet)
+		with locked_open(new_network_filepath, 'w') as f:
+			json.dump(newNet, f, indent=4)
+		_remove_network(owner, modelName, networkNum)
+		_write_to_input(model_dir, networkName, 'networkName' + str(networkNum))
+	except ValueError:
+		filepath = path_manager.join('data', 'Model', owner, modelName, 'cgmesError.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write('cgmesError')
+	except Exception:
+		filepath = path_manager.join('data', 'Model', owner, modelName, 'cgmesError.txt')
+		with locked_open(filepath, 'w') as errorFile:
+			errorFile.write('cgmesError')
 	finally:
 		os.remove(pid_filepath)
 
@@ -1964,7 +2017,7 @@ def _cleanup_error_files(model_dir):
 _RESERVED_FILENAMES = frozenset([
 	'ZPID.txt', 'APID.txt', 'NPID.txt', 'CPID.txt', 'WPID.txt', 'TPPID.txt', 'PPID.txt',
 	'allInputData.json', 'gridError.txt', 'error.txt', 'weatherError.txt',
-	'matError.txt', 'rawError.txt',
+	'matError.txt', 'rawError.txt', 'cgmesError.txt',
 ])
 
 

@@ -170,8 +170,8 @@
 						<li><a href='javascript:saveNetwork();'>Save</a></li>
 						<li><a href='javascript:renameNetwork();'>Rename</a></li>
 						<li><a href='javascript:showModal("blankNetworkModal");'>New Blank Network...</a></li>
-						<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Import...</a></li>
-						<li><a href='javascript:showModal("rawModal");'>RAW Import...</a></li>
+						<li><a href='javascript:showModal("matpowerModal");'>PandaPower MATPOWER Import...</a></li>
+						<li><a href='javascript:showModal("cgmesModal");'>CGMES/CIM Import...</a></li>
 						<li><a href='javascript:downloadTextFile("networkData.omt", JSON.stringify(networkData, null, 2));'>Download .omt File</a></li>
 					</ul>
 					{% endif %}
@@ -223,24 +223,24 @@
 			<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
 		</div>
 	</div>
-	<div id="rawModal" class= 'modal'>
-		<div class="modalContent" id='rawModalContent' style='width:350px;'>
-			<form onsubmit='startConversion("networkNameR", "raw", 2); return false;' action="/rawImport/{{ owner }}" id='raw' enctype='multipart/form-data' method='post'>
+	<div id="cgmesModal" class= 'modal'>
+		<div class="modalContent" id='cgmesModalContent' style='width:350px;'>
+			<form onsubmit='startConversion("networkNameC", "cgmes", 2); return false;' action="/cgmesImport/{{ owner }}" id='cgmes' enctype='multipart/form-data' method='post'>
 				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
 				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
 				<table class='importOptions'>
-				<th style="background:transparent;color:black;">RAW Conversion</th>
+				<th style="background:transparent;color:black;">CGMES/CIM Conversion</th>
 					<tr>
 						<td>Name</td>
-						<td><input type='text' id='networkNameR' name='networkNameR' required/></td>
+						<td><input type='text' id='networkNameC' name='networkNameC' required/></td>
 					</tr>
 					<tr>
-						<td>Data File (.raw)</td>
-						<td><input type='file' name='rawFile' accept = '.raw' required/></td>
+						<td>Data File (.zip)</td>
+						<td><input type='file' name='cgmesFile' accept = '.zip' required/></td>
 					</tr>
 					<tr>
-						<td><a id='modalCancel' href="#" onclick='closeModal("rawModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+						<td><a id='modalCancel' href="#" onclick='closeModal("cgmesModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
 						<td><input type='submit' value='Import' style='min-width:45px;'/></td>
 					</tr>
 				</table>
@@ -248,6 +248,7 @@
 			<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
 		</div>
 	</div>
+	
 	<div id='anonymizeModal' class='modal'>
 		<div class='modalContent' id='anonymizeModalContent' style='width:500px'>
 			<div style='font-weight:bold; font-size:14pt'>Anonymization</div>
@@ -1280,6 +1281,7 @@ function checkConversion() {
 				var messages = {
 					'matError': 'The .m file does not contain any valid data.',
 					'rawError': 'The .raw file does not contain any valid data.',
+					'cgmesError': 'The CGMES/CIM file does not contain valid data, or is missing required profiles.',
 					'octaveError': 'Matpower/Octave setup is incorrect; please contact your system administrator.'
 				};
 				window.clearInterval(intervalId);

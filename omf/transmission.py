@@ -4,6 +4,7 @@ import datetime, copy, os, re, json, tempfile, shutil, fileinput, webbrowser, pl
 from os.path import join as pJoin
 import networkx as nx
 import omf
+import pandapower as ppow
 
 def parse(inputStr, filePath=True):
 	''' Parse a MAT into an omf.network json. This is so we can walk the json, change things in bulk, etc.
@@ -22,6 +23,16 @@ def parseRaw(inputStr, filePath=True):
 	if not filePath:
 		os.remove(matfile_name)
 	return matDict
+
+def parseCgmes(inputStr, filePath=True):
+	''' Parse a CGMES/CIM ZIP into an omf.network json via pandapower. '''
+	if not filePath:
+		raise ValueError('CGMES import requires a file path.')
+	try:
+		pp_net = ppow.converter.from_cim(file_list=[inputStr])
+	except Exception as e:
+		raise ValueError('CGMES file/string does not contain valid data.') from e
+	return _pandapowerToOmt(pp_net)
 
 def write(inNet):
 	''' Turn an omf.network json object into a MAT-formatted string. '''
@@ -125,6 +136,27 @@ def _dictConversion(inputStr, filePath=True):
 def _dictToString(inDict):
 	''' Helper function: given a single dict representing a NETWORK, concatenate it into a string. '''
 	return ''
+
+def _pandapowerToOmt(net):
+	'''Convert a pandapower net object to a minimal OMF transmission .omt structure.'''
+	out = {"baseMVA":"100.0","mpcVersion":"2.0","bus":{},"gen":{}, "branch":{}}
+	if hasattr(net, 'sn_mva') and net.sn_mva:
+		out["baseMVA"] = str(net.sn_mva)
+	if hasattr(net, 'bus'):
+		for i, row in net.bus.iterrows():
+			k = str(len(out['bus']) + 1)
+			out['bus'][k] = {"bus_i":str(i),"type":"1","Pd":"0","Qd":"0","Gs":"0","Bs":"0","area":"1","Vm":"1","Va":"0","baseKV":str(row.get('vn_kv', 0) or 0),"zone":"1","Vmax":"1.05","Vmin":"0.95"}
+	if hasattr(net, 'gen'):
+		for _, row in net.gen.iterrows():
+			k = str(len(out['gen']) + 1)
+			out['gen'][k] = {"bus":str(row.get('bus')),"Pg":"0","Qg":"0","Qmax":str(row.get('max_q_mvar',0) or 0),"Qmin":str(row.get('min_q_mvar',0) or 0),"Vg":"1","mBase":out["baseMVA"],"status":"1","Pmax":str(row.get('max_p_mw',0) or 0),"Pmin":str(row.get('min_p_mw',0) or 0),"Pc1":"0","Pc2":"0","Qc1min":"0","Qc1max":"0","Qc2min":"0","Qc2max":"0","ramp_agc":"0","ramp_10":"0","ramp_30":"0","ramp_q":"0","apf":"0"}
+	if hasattr(net, 'line'):
+		for _, row in net.line.iterrows():
+			k = str(len(out['branch']) + 1)
+			r_total = (row.get('r_ohm_per_km',0) or 0) * (row.get('length_km',0) or 0)
+			x_total = (row.get('x_ohm_per_km',0) or 0) * (row.get('length_km',0) or 0)
+			out['branch'][k] = {"fbus":str(row.get('from_bus')),"tbus":str(row.get('to_bus')),"r":str(r_total),"x":str(x_total),"b":"0","rateA":str(row.get('max_i_ka',0) or 0),"rateB":"0","rateC":"0","ratio":"0","angle":"0","status":"1","angmin":"-360","angmax":"360"}
+	return out
 
 def _rawToMat(inputStr, filePath=True):
 	''' Turn a RAW file/string into a MATPOWER case structure. 
