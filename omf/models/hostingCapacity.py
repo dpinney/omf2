@@ -22,7 +22,7 @@ tooltip = "Calculate hosting capacity using AMI-based or model-based methods."
 modelName, template = __neoMetaModel__.metadata(__file__)
 hidden = False
 
-def convertTime( seconds ):
+def convertTime( seconds: float ) -> str:
 	"""
 	Convert time data between solver or OMF representations.
 	"""
@@ -33,9 +33,12 @@ def convertTime( seconds ):
 	seconds, milliseconds = divmod(remainder, 1000)
 	return "{:02d}:{:02d}:{:02d}.{:03d}".format(int(hours), int(minutes), int(seconds), int(milliseconds))
 
-def hostingCapacityMap( modelDir, inputDict, outData ):
+def hostingCapacityMap( modelDir, inputDict: dict, outData: dict ):
 	"""
 	Perform hosting capacity map processing for the hosting capacity model.
+
+	Checks if model free has buses that are shared with OMD file. That way model-free coloring can be on the map.
+
 	"""
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	pathToOmd = Path(modelDir, feederName)
@@ -162,7 +165,7 @@ def hostingCapacityMap( modelDir, inputDict, outData ):
 		# If there are no buses in the .csv that match the circuit, and model based and downline load both are not running, we don't need the map
 		outData["hideMap"] = True
 
-def run_downlineLoadAlgorithm( modelDir, inputDict, outData ):
+def run_downlineLoadAlgorithm( modelDir, inputDict: dict, outData: dict ) -> pd.DataFrame:
 	"""
 	Run the downline load algorithm workflow and return its results.
 	"""
@@ -177,8 +180,8 @@ def run_downlineLoadAlgorithm( modelDir, inputDict, outData ):
 	buses_output = {}
 	objectTypesFromGraph = nx.get_node_attributes(graph, 'object')
 
-	kwFromGraph = nx.get_node_attributes(graph, 'kw') #Load, generator attribute
-	kwRatedFromGraph = nx.get_node_attributes( graph, 'kwrated') # Storage attribute
+	kwFromGraph = nx.get_node_attributes(graph, 'kw') #Load, generator attribute have kw
+	kwRatedFromGraph = nx.get_node_attributes( graph, 'kwrated') # Storage attribute have kwrated
 	kvFromGraph = nx.get_node_attributes( graph, 'kv' )
 	# Check if they are buses
 	for bus in buses:
@@ -214,7 +217,7 @@ def run_downlineLoadAlgorithm( modelDir, inputDict, outData ):
 	outData['downline_runtime'] = convertTime( downline_end_time - downline_start_time )
 	return sorted_downlineDF
 
-def checkKvar( inputPathAMIData ):
+def checkKvar( inputPathAMIData )-> bool:
 	''' Uses sandia's get_has_input_q function from mohca_cl.sandia to check presence of reactive power'''
 	data = pd.read_csv(inputPathAMIData)
 	# First check of the column is there
@@ -224,7 +227,7 @@ def checkKvar( inputPathAMIData ):
 	else:
 		return False
 	
-def getBool( string ):
+def getBool( string ) -> bool:
 	''' Converts string of boolean word to python bool type'''
 	retVal = False
 	if string.lower() == "true":
@@ -233,8 +236,25 @@ def getBool( string ):
 		retVal = False
 	return retVal
 
-def run_AMIAlgorithm( modelDir, inputDict, outData ):
-	''' mohca data-driven hosting capacity '''
+def run_AMIAlgorithm( modelDir, inputDict: dict, outData: dict ):
+	''' mohca data-driven hosting capacity
+
+	parameters:
+	- modelDir
+	- inputDict (dict): Contains all the inputs from the user interface. See the wiki for more details on what inputs are expected and their formats.
+		- required for this function
+			- "AmiDataFileName": The name of the AMI data file that the user uploaded. This file should be in the correct format specified in the wiki. It is expected to be found in the model directory.
+
+	- outData (dict):
+
+	returns:
+	- nothing. Writes results to outData and to files in the model directory.
+		- Warnings if
+			- Reactive power (kvar) is not present in the AMI data. Warning is given and only voltage-constrained hosting capacity results are calculated.
+			- No Customer Pairing info is provided. This is needed for thermal hosting capacity, so if it's not provided, a warning is given and thermal hosting capacity results are not calculated.
+			- Transformer Num if its set to 0
+	
+	'''
 
 	inputPathAMIData = Path(modelDir, inputDict['AmiDataFileName'])
 	AMIDataAsString = inputPathAMIData.read_text()
@@ -382,9 +402,15 @@ def run_AMIAlgorithm( modelDir, inputDict, outData ):
 	outData['AMI_tableValues'] = ( list(modelFreeResultsSorted.itertuples(index=False, name=None)) )
 	outData['AMI_runtime'] = convertTime( amiEndTime - amiStartTime )
 
-def run_modelBasedAlgorithm( modelDir, inputDict, outData ):
+def run_modelBasedAlgorithm( modelDir, inputDict: dict, outData: dict ):
 	"""
 	Run the model based algorithm workflow and return its results.
+
+	returns:
+	- nothing. Writes results to outData and to files in the model directory.
+		- "circuit.dss" file is created.
+		- "output_tradHC.csv" file is created with the traditional hosting capacity results.
+		- "modelBasedGraphData" key in outData is updated with the graph data for the model-based results.
 	"""
 	feederName = [x for x in os.listdir(modelDir) if x.endswith('.omd')][0]
 	inputDict['feederName1'] = feederName[:-4]
