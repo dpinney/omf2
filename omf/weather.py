@@ -1512,7 +1512,7 @@ def nsrbd_latlon_to_wkt(longitude, latitude):
 
 def nrl_get_nsrdb_data(data_set: str, longitude: float, latitude: float, year: int, api_key, attributes=[], utc='true', leap_day='false', email='admin@omf.coop', interval=None, filename=None):
 	'''Create nsrdb factory and execute query. Optional output to file or return the response object.'''
-	base_url = 'https://developer.nrel.gov'
+	base_url = 'https://developer.nrl.gov'
 	request_url = ""
 	params = {}
 	params['api_key'] = api_key
