@@ -81,7 +81,7 @@ def _pysam_sysDesignSetup(inputDict: dict, lat: float, long: float) -> dict:
 	}
 	return sys_design
 
-def run_pvwatts(modelDir, sys_design: dict, dataFile: str = "solar_resource_file.csv", setYear: bool=False, year: str=None):
+def run_pvwatts(modelDir, sys_design: dict, dataFile: str = "solar_resource_file.csv", setYear: bool=False, year: str=None) -> tuple:
 	'''
 
 	Runs PySAM PvWattsv8 with the given system design and solar resource data.
@@ -185,7 +185,7 @@ def run_pvwatts(modelDir, sys_design: dict, dataFile: str = "solar_resource_file
 	results_df = results_df.drop( columns=["timestamp"] )
 	return pvwatts_model, results_df
 
-def run_pvwatts_historical_max(modelDir, sys_design: dict, dataFile: str="solar_resource_file.csv"):
+def run_pvwatts_historical_max(modelDir, sys_design: dict, dataFile: str="solar_resource_file.csv") -> tuple:
 	'''
 
 	Runs PySAM PvWattsv8 with historical clearsky DNI/DHI/GHI data. Windspeed and temp set to 0.
@@ -292,7 +292,7 @@ def _nrel_getWindData(modelDir, year: int, longitude: float, latitude: float) ->
 		successFlag = True
 	return successFlag
 
-def nlr_pySam_getWind(modelDir, year: int, longitude: float, latitude: float):
+def nlr_pySam_getWind(modelDir, year: int, longitude: float, latitude: float) -> dict:
 	'''
 		'windpower-inputs.json' - windpower defaults
 		'wind-turbines.json' - wind turbine data. 
@@ -341,7 +341,7 @@ def nlr_pySam_getWind(modelDir, year: int, longitude: float, latitude: float):
 #### Cool stuff with copernicus data
 ## PySAM PvWatts & feedinlib for solar and wind stuff
 
-def cds_csvToPySAMSolarData(cdsDataFile: str="output_cdsWeatherDataFull.csv"):
+def cds_csvToPySAMSolarData(cdsDataFile: str="output_cdsWeatherDataFull.csv") -> np.array:
 	'''
 		Turns one large CVS of copernicus weather data into the inputs required for pysam pvwatts 
 	'''
@@ -376,7 +376,6 @@ def cds_csvToPySAMSolarData(cdsDataFile: str="output_cdsWeatherDataFull.csv"):
 			copernicus_df["CDS Wind Speed"],
 			copernicus_df['CDS Temp']
 	])
-
 	return weather_data
 
 def cds_pySAM_getSolar(cdsDataFile):
