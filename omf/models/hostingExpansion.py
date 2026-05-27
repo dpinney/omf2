@@ -51,7 +51,7 @@ def checkCircuitSolar(modelDir, inputDict: dict):
 	return returningKW
 '''
 
-def work(modelDir, inputDict):
+def work(modelDir, inputDict: dict) -> dict:
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists
 	outData = {}
