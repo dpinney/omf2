@@ -1,8 +1,8 @@
 ## Introduction
 
-The [hostingCapacity model](https://omf.coop/newModel/hostingCapacity/fromWiki) calculates hosting capacity for DERs.
+The hosting capacity model calculates hosting capacity for DERs.
 
-Three methods are available which can be used together or individually: <br />
+Three methods are available which can be used: <br />
 
 * An AMI-based option or the "Model Free Hosting Capacity Analysis" ( MoHCA ) option <br />
   * Voltage-constrained and/or thermal-constrained.
@@ -17,7 +17,7 @@ Three methods are available which can be used together or individually: <br />
 ![ModelInputs](images/hostingCapacity_modelInputs.png)
 
 **Input 0: Circuit File**<br />
-The first input for the model. Required for model-based and downline load to run. Not required for model-free. Map interface is built off circuit so if you are only running model-free then no map interface will be displayed.
+Required for model-based and downline load to run. Not required for model-free. Map interface is built off circuit so if you are only running model-free then no map interface will be displayed.
 
 To upload a circuit file:
 
@@ -41,9 +41,9 @@ If you would like to run AMI-based hosting capacity - select on.
 
 **Input 3: Meter Data Input File**
 
-CSV files are used to input meter data with 5 columns: <br />
+CSV file with 5 columns: <br />
 
-* [busname, datetime, volts reading, kwWatts reading, kVAR reading]
+* [busname, datetime, volts reading, kWatts reading, kVAR reading]
 
 | Input Title      | Input Datatype                                  |
 | -------------    | -------------                                   |
@@ -53,7 +53,7 @@ CSV files are used to input meter data with 5 columns: <br />
 | kw_reading       | float, avg over the measurement interval        |
 | kvar_reading     | float, avg over the measurement interval        |
 
-* Input titles much match those in the chart for both model-free algorithms to run successfully.
+* Input titles much match those shown above for both model-free algorithms to run successfully.
 * A minimum of 1 year of readings at the hourly level are required to run the model (i.e. 8,760 time steps). Performance can be improved by user higher resolution data, for example 15-minute intervals (35,040 time steps).
 
 #### Example of .csv input file (sandia1): <br />
