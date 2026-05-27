@@ -83,6 +83,9 @@ def _pysam_sysDesignSetup(inputDict: dict, lat: float, long: float) -> dict:
 
 def run_pvwatts(modelDir, sys_design: dict, dataFile: str = "solar_resource_file.csv", setYear: bool=False, year: str=None):
 	'''
+
+	Runs PySAM PvWattsv8 with the given system design and solar resource data.
+
 	parameters:
 	- modelDir (str): The directory where the model is located.
 	- sys_design is the output of _pysam_sysDesignSetup.
@@ -185,6 +188,7 @@ def run_pvwatts(modelDir, sys_design: dict, dataFile: str = "solar_resource_file
 def run_pvwatts_historical_max(modelDir, sys_design: dict, dataFile: str="solar_resource_file.csv"):
 	'''
 
+	Runs PySAM PvWattsv8 with historical clearsky DNI/DHI/GHI data. Windspeed and temp set to 0.
 	see omf hostingExpansion.py for example.
 
 	parameters:
