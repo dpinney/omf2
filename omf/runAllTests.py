@@ -70,8 +70,8 @@ def _run_test_subprocess(module):
 def run_all_tests(parallel_modules=()):
 	'''Run every discovered test, optionally isolating selected modules in subprocesses.'''
 	all_testable_mods = get_all_testable_modules()
-	selected = set(parallel_modules)
-	unknown = selected.difference(all_testable_mods)
+	selected = list(dict.fromkeys(parallel_modules))
+	unknown = set(selected).difference(all_testable_mods)
 	if unknown:
 		raise ValueError('Parallel modules must be discovered tests: ' + ', '.join(sorted(unknown)))
 
@@ -79,7 +79,7 @@ def run_all_tests(parallel_modules=()):
 	with ThreadPoolExecutor(max_workers=2) as pool:
 		background = {
 			mod: pool.submit(_run_test_subprocess, mod)
-			for mod in all_testable_mods if mod in selected
+			for mod in selected
 		}
 		for mod in all_testable_mods:
 			if mod in background:
@@ -123,7 +123,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Run all OMF smoke tests or test one module.')
 	parser.add_argument('module', nargs='?', help='Dotted OMF module name, such as omf.models.modelSkeleton')
 	parser.add_argument('--parallel-module', action='append', default=[],
-		help='Run this discovered module alongside the suite in an isolated process (repeatable).')
+		help='Queue this discovered module for an isolated worker (repeat in priority order).')
 	args = parser.parse_args()
 	if args.module is None:
 		run_all_tests(args.parallel_module)

@@ -89,10 +89,13 @@ jobs:
         env:
           OMF_GRIDLABD_AUTO_INSTALL: "0"
           OMF_SPLAT_AUTO_INSTALL: "0"
+        # Start Julia and phase balance first, then reuse the same two worker slots.
         run: >-
           python -m omf.runAllTests
-          --parallel-module omf.models.phaseBalance
           --parallel-module omf.models.microgridDesign
+          --parallel-module omf.models.phaseBalance
+          --parallel-module omf.models.vbatDispatch
+          --parallel-module omf.models.derInterconnection
       - name: Stage complete REopt artifacts for caching
         if: steps.reopt-cache.outputs.cache-hit != 'true'
         env:
