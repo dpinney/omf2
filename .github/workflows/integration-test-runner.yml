@@ -61,7 +61,10 @@ jobs:
           echo "Restored the REopt system image and install marker from cache."
       - name: Run All OMF Tests
         working-directory: ${{ runner.temp }}
-        run: python -m omf.runAllTests
+        run: >-
+          python -m omf.runAllTests
+          --parallel-module omf.models.derInterconnection
+          --parallel-module omf.models.phaseBalance
       - name: Stage complete REopt artifacts for caching
         if: steps.reopt-cache.outputs.cache-hit != 'true'
         env:
