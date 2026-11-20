@@ -32,6 +32,7 @@ The OMF has an easy-to-use web frontend. You can run it yourself or use the free
 * [microgridControl](./Models-~-microgridControl.md)
 * [microgridDesign](./Models-~-microgridDesign.md)
 * [networkStructure](./Models-~-networkStructure.md)
+* [newResDist](./Models-~-newResDist.md)
 * [outageCost](./Models-~-outageCost.md)
 * [phaseBalance](./Models-~-phaseBalance.md)
 * [phaseId](./Models-~-phaseId.md)

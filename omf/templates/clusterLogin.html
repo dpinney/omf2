@@ -1,9 +1,10 @@
 <head>
 	<title>Open Modeling Framework</title>
 	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
 	<meta name='description' content='The Open Modeling Framework (OMF), a web application for simulating power systems behavior with an emphasis on cost-benefit analysis of emerging technologies: distributed generation, storage, networked controls, etc.'>
 	<style type='text/css'>
-		div#container {clear:both; position:relative; margin:0 auto; padding:0; width:1024px; height:500px}
+		div#container {clear:both; position:relative; margin:0 auto; padding:0; width:100%; max-width:1024px; height:500px}
 		div#pusherRobot {float:left; height:50%; margin-bottom:-250px;}
 		div.subContainer {margin:0; display:inline-block; width:50%;height:100%; text-align: center}
 		div#advertisingFrame {float:left; border-radius: 25px; color:white; text-align:center; line-height: 500px; background-image:url('/static/gridAbstract.png'); background-size:500px;}
@@ -21,6 +22,28 @@
 		a.quickNew {display:inline-block; font-size:14pt;margin-left:-5px; margin-top:-10px; padding:7px 10px 7px 10px; text-decoration:none;}
 		a.quickNew:hover {color:black;}
 		a {text-decoration:none;}
+		#model-catalog {max-width:1024px; margin:7rem auto 4rem; padding:0 1rem; color:#222; font:1rem/1.5 system-ui,sans-serif}
+		#model-catalog a {color:#145e83; text-decoration:underline}
+		#model-catalog h2, #model-catalog h3 {line-height:1.25}
+		#model-catalog h3 {margin:2rem 0 .75rem}
+		#model-catalog table {width:100%; border-collapse:collapse; margin:0 0 1.5rem}
+		#model-catalog th, #model-catalog td {padding:.65rem; border-bottom:1px solid #d7e0e5; text-align:left; vertical-align:top}
+		#model-catalog th {background:#eef4f7}
+		#model-catalog img {display:block; max-width:100%; max-height:14rem; height:auto; object-fit:contain}
+		@media (max-width:1080px) {
+			div#subLinks {left:0}
+		}
+		@media (max-width:760px) {
+			div#container {height:auto}
+			div#advertisingFrame, div#login {float:none; display:block; width:100%; height:auto}
+			div#advertisingFrame {background:none; line-height:normal}
+			div#subLinks {position:static; line-height:normal}
+			p#loginTitle {padding-top:1rem}
+			input[type='text'], input[type='password'] {max-width:90%; box-sizing:border-box}
+			#model-catalog {margin-top:3rem}
+			#model-catalog table {display:block; overflow-x:auto}
+			#model-catalog th, #model-catalog td {min-width:7rem}
+		}
 	</style>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<script type='text/javascript' src='/static/omf.js'></script>
@@ -88,4 +111,9 @@
 			<a class='quickNew' href="#" id="requestAccess" onclick="newAccount()">Create Account?</a>
 		</div>
 	</div>
+	{% if model_catalog %}
+		<section id='model-catalog' aria-label='OMF model catalog'>
+			{{ model_catalog | safe }}
+		</section>
+	{% endif %}
 </body>
