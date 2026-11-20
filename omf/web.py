@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 from functools import lru_cache, wraps
+from importlib.metadata import PackageNotFoundError, metadata
 from flask import (Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, url_for, g, has_request_context)
 import boto3
 from jinja2 import Template
@@ -626,6 +627,31 @@ def _render_markdown_doc(source_path):
 	return render_template("docs.html", title=_doc_title(markdown_text, source_path), content=content)
 
 
+def _render_login_catalog():
+	'''Render the trusted README catalog from a checkout or installed package.'''
+	readme = Path(_omfDir).parent / 'readme.md'
+	if readme.is_file():
+		readme_text = readme.read_text(encoding='utf-8')
+	else:
+		try:
+			readme_text = metadata('omf').get('Description', '')
+		except PackageNotFoundError:
+			return ''
+
+	_, start, remainder = readme_text.partition('<!-- omf-catalog:start -->')
+	catalog, end, _ = remainder.partition('<!-- omf-catalog:end -->')
+	if not start or not end:
+		return ''
+
+	# README links use checkout paths. The app serves the same files under /docs.
+	catalog = re.sub(
+		r'\]\(\./omf/docs/([^)\s]+)\)',
+		lambda link: '](' + url_for('docs', doc_path=link[1]) + ')',
+		catalog)
+	html = markdown.markdown(catalog, extensions=['tables'], output_format='html5')
+	return html.replace('<img ', '<img loading="lazy" ')
+
+
 @lru_cache(maxsize=1)
 def _get_valid_model_types():
 	'''Return the set of valid model type names (computed once, cached).'''
@@ -1014,7 +1040,7 @@ def login_page():
 		nextUrl = "/"
 	if _current_user_is_authenticated():
 		return redirect(nextUrl)
-	return render_template("clusterLogin.html", next=nextUrl)
+	return render_template("clusterLogin.html", next=nextUrl, model_catalog=_render_login_catalog())
 
 
 @app.route("/logout", methods=["POST"])
