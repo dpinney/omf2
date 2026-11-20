@@ -9,11 +9,33 @@ OMF helps electric utilities model their grids and evaluate changes such as addi
 - **Edit a feeder on a map.** Draw circuit components, inspect and edit equipment, and work with feeder files in the browser. [GIS editor guide](./omf/docs/Other-~-gridEdit.md)
 - **Convert circuit data.** Import Milsoft WindMil data and work with GridLAB-D, OpenDSS, and OMF feeder files. [WindMil import](./omf/docs/Other-~-Windmil-Data-Import.md) · [OpenDSS import requirements](./omf/docs/Other-~-OpenDSS-Syntax-Requirements.md)
 
-### Example results
+### Screenshots
 
-| DER thermal loading | Solar hosting capacity | Microgrid resilience |
-| --- | --- | --- |
-| [![Feeder map showing line thermal loading](./omf/docs/images/derInterconnection_thermal.png)](./omf/docs/Models-~-derInterconnection.md) | [![Feeder map showing a model-based hosting capacity study](./omf/docs/images/hostingCapacity_resultsMap.png)](./omf/docs/Models-~-hostingCapacity.md) | [![Chart showing how long a microgrid can sustain an outage](./omf/docs/images/multiSiteMicrogridDesign_resilience.png)](./omf/docs/Models-~-microgridDesign.md) |
+Select a screenshot to open it at full size.
+
+#### GIS feeder editor
+
+Inspect a feeder layout and edit circuit components in the browser. [GIS editor guide](./omf/docs/Other-~-gridEdit.md)
+
+[![OMF feeder editor with a network diagram and editing menus](./omf/docs/images/gridEdit_fullPage.png)](./omf/docs/images/gridEdit_fullPage.png)
+
+#### DER interconnection
+
+Compare feeder voltages for scenarios with and without the proposed generator. [DER Interconnection guide](./omf/docs/Models-~-derInterconnection.md)
+
+[![DER Interconnection load-flow results with scenario controls and a color-coded voltage map](./omf/docs/images/derInterconnection_loadFlowPlots.png)](./omf/docs/images/derInterconnection_loadFlowPlots.png)
+
+#### Solar hosting capacity
+
+See how much additional solar the example feeder can host by location. [Hosting Capacity guide](./omf/docs/Models-~-hostingCapacity.md)
+
+[![Hosting capacity results mapped across an example feeder](./omf/docs/images/hostingCapacity_resultsMap.png)](./omf/docs/images/hostingCapacity_resultsMap.png)
+
+#### Microgrid resilience
+
+See how outage start time and duration affect the modeled microgrid’s ability to serve load. [Microgrid Design guide](./omf/docs/Models-~-microgridDesign.md)
+
+[![Microgrid resilience results showing hours of load served and outage survival probability](./omf/docs/images/multiSiteMicrogridDesign_resilience.png)](./omf/docs/images/multiSiteMicrogridDesign_resilience.png)
 
 ### Grid studies and interconnection
 
