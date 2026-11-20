@@ -3,7 +3,7 @@ Locate, install, run, and parse GridLAB-D simulations for OMF distribution-model
 analyses.
 """
 
-import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time, tempfile, json
+import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time, tempfile, json, csv
 from os.path import join as pJoin
 from copy import deepcopy
 
@@ -354,8 +354,16 @@ def _tests():
 		tmyStr = climateFile.read()
 	# Add climate in.
 	feederJson["attachments"]["climate.tmy2"] = tmyStr
-	testStudy = runInFilesystem(feederJson["tree"], feederJson["attachments"])
-	assert testStudy != {}, "Gridlab run failed and we got blank output."
+	dump_name = 'voltDump.csv'
+	omf.feeder.insert(feederJson['tree'], {'object': 'voltdump', 'filename': dump_name})
+	with tempfile.TemporaryDirectory(prefix='omf-gridlabd-') as work_dir:
+		testStudy = runInFilesystem(feederJson['tree'], feederJson['attachments'], workDir=work_dir)
+		voltage_dump = pJoin(work_dir, dump_name)
+		if not os.path.isfile(voltage_dump):
+			raise RuntimeError('GridLAB-D did not produce a voltage dump.\n' + testStudy.get('stderr', ''))
+		with open(voltage_dump, newline='') as voltages:
+			if not any(row and row[0] == 'n650' for row in csv.reader(voltages)):
+				raise RuntimeError('GridLAB-D did not report voltage at the feeder source node n650.')
 	print("GridlabD standard error:", testStudy['stderr'])
 	print("GridlabD standard output:", testStudy['stdout'])
 
