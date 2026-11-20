@@ -1,17 +1,9 @@
 # Open Modeling Framework
 
-OMF helps electric utilities model their grids and evaluate changes such as adding solar, installing batteries, and improving reliability. [Open OMF in your browser](https://omf.coop/) or [read the full documentation](./omf/docs/README.md).
+OMF helps electric utilities model their grids and evaluate changes such as adding solar, installing batteries, and improving reliability. [Open OMF in your browser](https://omf.coop/), [read the full documentation](./omf/docs/README.md), or install your own copy with `python -m pip install 'git+https://github.com/nreca-bts/omf'`
 
 <!-- omf-catalog:start -->
-## What you can do with OMF
-
-- **Run grid and energy simulations.** OMF provides Python interfaces to solvers such as GridLAB-D, OpenDSS, MATPOWER, PySAM, and REopt. [Architecture notes](./omf/docs/Dev-~-Architecture-Notes.md)
-- **Edit a feeder on a map.** Draw circuit components, inspect and edit equipment, and work with feeder files in the browser. [GIS editor guide](./omf/docs/Other-~-gridEdit.md)
-- **Convert circuit data.** Import Milsoft WindMil data and work with GridLAB-D, OpenDSS, and OMF feeder files. [WindMil import](./omf/docs/Other-~-Windmil-Data-Import.md) · [OpenDSS import requirements](./omf/docs/Other-~-OpenDSS-Syntax-Requirements.md)
-
-### Screenshots
-
-Select a screenshot to open it at full size.
+## Overview
 
 #### GIS feeder editor
 
@@ -37,7 +29,7 @@ See how outage start time and duration affect the modeled microgrid’s ability 
 
 [![Microgrid resilience results showing hours of load served and outage survival probability](./omf/docs/images/multiSiteMicrogridDesign_resilience.png)](./omf/docs/images/multiSiteMicrogridDesign_resilience.png)
 
-### Grid studies and interconnection
+## Grid studies and interconnection features
 
 | Model | Question it answers | Inputs | Outputs |
 | --- | --- | --- | --- |
@@ -55,7 +47,7 @@ See how outage start time and duration affect the modeled microgrid’s ability 
 | [transmission](./omf/docs/Models-~-transmission.md) | What voltages result from a transmission power-flow study? | MATPOWER case with buses, branches, and generators | Bus voltage table and circuit visualization |
 | [voltageDrop](./omf/docs/Models-~-voltageDrop.md) | Where are voltages high or low on a feeder? | Feeder and display options | Color-coded voltage map across the feeder |
 
-### Reliability, resilience, and communications
+## Reliability, resilience, and communications features
 
 | Model | Question it answers | Inputs | Outputs |
 | --- | --- | --- | --- |
@@ -66,7 +58,7 @@ See how outage start time and duration affect the modeled microgrid’s ability 
 | [rfCoverage](./omf/docs/Models-~-rfCoverage.md) | Where might a radio tower provide coverage? | Tower coordinates, height, power, frequency, and terrain | Map of estimated signal coverage |
 | [smartSwitching](./omf/docs/Models-~-smartSwitching.md) | How much reliability benefit could an added recloser provide? | Feeder, proposed recloser location, and historical or simulated faults | Before/after reliability metrics, outage costs, and feeder graphic |
 
-### Solar, microgrids, and storage
+## Solar, microgrids, and storage features
 
 | Model | Question it answers | Inputs | Outputs |
 | --- | --- | --- | --- |
@@ -80,7 +72,7 @@ See how outage start time and duration affect the modeled microgrid’s ability 
 | [storageDeferral](./omf/docs/Models-~-storageDeferral.md) | How much storage would keep a transformer or line below its limit? | Load profile, equipment loading limit, and battery and upgrade costs | Required batteries, adjusted load, dispatch, and deferral economics |
 | [storagePeakShave](./omf/docs/Models-~-storagePeakShave.md) | How much could a battery save in demand charges? | Load profile, demand charges, battery specs, and dispatch strategy | Monthly peak reductions, battery dispatch, and cash flow |
 
-### Load flexibility, forecasting, and meter data
+## Load flexibility, forecasting, and meter data
 
 | Model | Question it answers | Inputs | Outputs |
 | --- | --- | --- | --- |
@@ -95,6 +87,12 @@ See how outage start time and duration affect the modeled microgrid’s ability 
 | [vbatStacked](./omf/docs/Models-~-vbatStacked.md) | What could a fleet of flexible loads earn across multiple services? | Device fleet, load and weather data, and service and payment assumptions | Dispatch, stacked revenue, cash flow, and payback |
 | [weatherPull](./omf/docs/Models-~-weatherPull.md) | What historical weather data can I use for a model? | Data source, location or station, year, and parameter | Weather time series and downloadable CSV |
 <!-- omf-catalog:end -->
+
+## General Platform Functionality
+
+- **Run grid and energy simulations.** OMF provides Python interfaces to solvers such as GridLAB-D, OpenDSS, MATPOWER, PySAM, and REopt. [Architecture notes](./omf/docs/Dev-~-Architecture-Notes.md)
+- **Edit a feeder on a map.** Draw circuit components, inspect and edit equipment, and work with feeder files in the browser. [GIS editor guide](./omf/docs/Other-~-gridEdit.md)
+- **Convert circuit data.** Import Milsoft WindMil data and work with GridLAB-D, OpenDSS, and OMF feeder files. [WindMil import](./omf/docs/Other-~-Windmil-Data-Import.md) · [OpenDSS import requirements](./omf/docs/Other-~-OpenDSS-Syntax-Requirements.md)
 
 ## Installation
 
