@@ -3,7 +3,7 @@ Discover OMF modules with test entrypoints and run their module-level smoke test
 repeatable order.
 """
 
-import os, subprocess, sys, platform, pkgutil, importlib, omf, traceback
+import os, subprocess, sys, platform, pkgutil, importlib, omf, traceback, shutil
 from concurrent.futures import ThreadPoolExecutor
 from tempfile import TemporaryDirectory
 from time import perf_counter
@@ -44,6 +44,30 @@ def run_tests_on_module(mod_name):
 	my_mod = importlib.import_module(mod_name)
 	test_func = getattr(my_mod, '_tests')
 	test_func()
+
+def run_smoke_tests(system_solvers=False):
+	'''Check an installed OMF package with small model and solver cases.'''
+	from omf.models import modelSkeleton
+	from omf.solvers import gridlabd, opendss
+
+	result = modelSkeleton.work(None, {'input1': '2', 'input2': '3'})
+	if result['output'] != '5':
+		raise RuntimeError(f'OMF model smoke test returned an unexpected result: {result}')
+
+	opendss.runDssCommand('clear', strict=True)
+	opendss.runDssCommand('new circuit.smoke basekv=12.47 bus1=source', strict=True)
+	opendss.runDssCommand('new load.smoke bus1=source phases=3 kv=12.47 kw=30', strict=True)
+	opendss.runDssCommand('solve', strict=True)
+	if not opendss.dss.Solution.Converged() or opendss.dss.Circuit.NumBuses() != 1:
+		raise RuntimeError('OpenDSS smoke circuit did not converge with one bus.')
+	print('OMF model and OpenDSS smoke tests passed.')
+
+	if system_solvers:
+		missing = [name for name in ('gridlabd', 'splat', 'srtm2sdf') if not shutil.which(name)]
+		if missing:
+			raise RuntimeError('Required solver commands are missing from PATH: ' + ', '.join(missing))
+		gridlabd._tests()
+		print('GridLAB-D feeder simulation passed and SPLAT commands are available.')
 
 def _print_header(header):
 	"""
@@ -120,12 +144,18 @@ def run_all_tests(parallel_modules=()):
 if __name__ == '__main__':
 	import argparse
 
-	parser = argparse.ArgumentParser(description='Run all OMF smoke tests or test one module.')
+	parser = argparse.ArgumentParser(description='Check an OMF installation, test one module, or run the full suite.')
 	parser.add_argument('module', nargs='?', help='Dotted OMF module name, such as omf.models.modelSkeleton')
+	parser.add_argument('--smoke', nargs='?', const='basic', choices=('basic', 'solvers'),
+		help='Check a model and OpenDSS. Use --smoke solvers to also require GridLAB-D and SPLAT on Ubuntu.')
 	parser.add_argument('--parallel-module', action='append', default=[],
 		help='Queue this discovered module for an isolated worker (repeat in priority order).')
 	args = parser.parse_args()
-	if args.module is None:
+	if args.smoke:
+		if args.module or args.parallel_module:
+			parser.error('--smoke runs separately from module and full-suite tests.')
+		run_smoke_tests(system_solvers=args.smoke == 'solvers')
+	elif args.module is None:
 		run_all_tests(args.parallel_module)
 	elif args.parallel_module:
 		parser.error('--parallel-module applies only when running the full suite.')
