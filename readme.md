@@ -90,9 +90,14 @@ See how outage start time and duration affect the modeled microgrid’s ability 
 
 ## General Platform Functionality
 
-- **Run grid and energy simulations.** OMF provides Python interfaces to solvers such as GridLAB-D, OpenDSS, MATPOWER, PySAM, and REopt. [Architecture notes](./omf/docs/Dev-~-Architecture-Notes.md)
-- **Edit a feeder on a map.** Draw circuit components, inspect and edit equipment, and work with feeder files in the browser. [GIS editor guide](./omf/docs/Other-~-gridEdit.md)
-- **Convert circuit data.** Import Milsoft WindMil data and work with GridLAB-D, OpenDSS, and OMF feeder files. [WindMil import](./omf/docs/Other-~-Windmil-Data-Import.md) · [OpenDSS import requirements](./omf/docs/Other-~-OpenDSS-Syntax-Requirements.md)
+OMF's Python libraries let you build custom studies from the same circuit, mapping, and simulation tools used by the models above.
+
+- **Reuse circuit models across tools.** Import Milsoft WindMil and CYME feeder exports. Convert GridLAB-D and compatible OpenDSS circuits to OMF's JSON feeder format (`.omd`), which stores equipment, connectivity, coordinates, and attachments. [WindMil import](./omf/docs/Other-~-Windmil-Data-Import.md) · [OpenDSS import requirements](./omf/docs/Other-~-OpenDSS-Syntax-Requirements.md)
+- **Map and edit feeder topology.** Add or move equipment and edit its electrical parameters in the browser. From Python, export a feeder as GeoJSON for GIS work, generate a standalone HTML map, or trace the shortest path between two devices. [GIS editor guide](./omf/docs/Other-~-gridEdit.md) · [Geospatial library](./omf/geo.py)
+- **Drive simulations with measured load and weather.** Apply interval meter readings as load shapes at individual feeder objects or calibrate a feeder against substation SCADA data. Pull historical temperature, wind, and irradiance series for load and generation studies. [Load modeling](./omf/docs/Other-~-gridEdit.md#scada-loadshapes) · [Weather tools](./omf/docs/Models-~-weatherPull.md)
+- **Script power flow, generation, and optimization.** Run distribution studies with GridLAB-D or OpenDSS, solve MATPOWER-format transmission cases with pandapower, estimate solar output with PySAM, and size and dispatch microgrid resources with REopt. [Solver interfaces](./omf/solvers) · [Transmission library](./omf/transmission.py)
+- **Simplify OpenDSS feeders for larger studies.** Merge compatible line segments and aggregate secondary loads and service transformers to reduce the number of elements a simulation has to solve. [Feeder reduction guide](./omf/docs/Other-~-modelReduction.md)
+- **Prepare circuit data for sharing.** Replace equipment and bus names, move or randomize coordinates, and perturb selected electrical values on a copy of a distribution or transmission model. [Anonymization library](./omf/anonymization.py)
 
 ## Installation
 
