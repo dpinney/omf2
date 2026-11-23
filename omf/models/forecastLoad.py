@@ -55,7 +55,7 @@ def work(modelDir, inputDict):
 			df = pd.read_csv(inFile, header=None)
 			df.columns = ["load", "tempc"]
 			df["dates"] = pd.date_range(
-				start=inputDict["simStartDate"], freq="H", periods=df.shape[0]
+				start=inputDict["simStartDate"], freq="h", periods=df.shape[0]
 			)
 			print(df.shape[0])
 	except ZeroDivisionError:

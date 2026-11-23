@@ -186,7 +186,7 @@ def nextDayPeakKatrinaForecast(
 	from sklearn.svm import SVR
 
 	# loading rawData into pandas
-	datetime_index = pd.date_range(start=startDate, periods=len(rawData), freq="H")
+	datetime_index = pd.date_range(start=startDate, periods=len(rawData), freq="h")
 	input_df = pd.DataFrame(rawData, index=datetime_index)
 	input_df.columns = ["demand", "tdy_temp"]
 	input_df.to_csv(pJoin(modelDir, "indata.csv"))
@@ -203,13 +203,13 @@ def nextDayPeakKatrinaForecast(
 	df["tmr_temp"] = tmp.shift(-1)
 
 	# finessing the demand
-	de = input_df.demand.resample("H").mean()
+	de = input_df.demand.resample("h").mean()
 	peak_demand = de.resample("D").max()
 	peak_time = de.resample("D").aggregate(
 		lambda S: S.idxmax().hour + S.idxmax().minute / 60
 	)
 	# calculating two peaks per day: 0-12, 12-24
-	peak_time_12 = de.resample("12H").aggregate(
+	peak_time_12 = de.resample("12h").aggregate(
 		lambda S: S.idxmax().hour + S.idxmax().minute / 60
 	)
 	peak_time_m = peak_time_12[peak_time_12.index.hour == 0]
@@ -263,7 +263,7 @@ def nextDayPeakKatrinaForecast(
 		dates = list(df.index.to_pydatetime())
 		dates = dates[: len(peak_time)]
 		for i in range(len(dates)):
-			dates[i] += timedelta(hours=peak_time[i])
+			dates[i] += timedelta(hours=peak_time.iloc[i])
 		actual_peak_time = [date.isoformat() for date in dates]
 		return (
 			forecasted_peak_time,
@@ -285,7 +285,7 @@ def prophetForecast(rawData, startDate, modelDir, partitions):
 	prophet = Prophet()
 
 	# put dates in df
-	dates = pd.date_range(start=startDate, periods=len(rawData), freq="H")
+	dates = pd.date_range(start=startDate, periods=len(rawData), freq="h")
 	input_df = pd.DataFrame(rawData, columns=["y", "temp"])
 	input_df["ds"] = dates.to_pydatetime()
 	input_df.to_csv(pJoin(modelDir, "prophetin.csv"))
@@ -556,7 +556,7 @@ def makeUsefulDf(df, noise=2.5, hours_prior=24, structure=None):
 	# load processing
 	r_df["load_n"] = zscore(df["load"])
 	r_df["load_prev_n"] = r_df["load_n"].shift(hours_prior)
-	r_df["load_prev_n"].bfill(inplace=True)
+	r_df["load_prev_n"] = r_df["load_prev_n"].bfill()
 	if structure != '3D':
 		def _chunks(l, n):
 			return [l[i : i + n] for i in range(0, len(l), n)]
@@ -701,3 +701,24 @@ def add_day(df, weather):
 	df = pd.concat([df, pd.DataFrame(d_24)], ignore_index=True)
 
 	return df, predicted_day
+
+
+def _tests():
+	'''Check lag features and dated peak forecasts without optional ML packages.'''
+	from tempfile import TemporaryDirectory
+
+	dates = pd.date_range('2023-12-26', periods=12 * 24, freq='h')
+	peak_hours = np.where(dates.dayofyear % 2, 8, 16)
+	demand = 100.0 - np.abs(dates.hour - peak_hours)
+	temperature = 20.0 + np.sin(np.arange(len(dates)) / 24)
+	data = pd.DataFrame({'dates': dates, 'load': demand, 'tempc': temperature})
+	features, _ = makeUsefulDf(data, noise=0)
+	assert np.isfinite(features['load_prev_n']).all(), 'Lagged load must be backfilled before training.'
+
+	with TemporaryDirectory() as model_dir:
+		raw_data = data[['load', 'tempc']].to_numpy().tolist()
+		_, _, actual_times, actual_demands = nextDayPeakKatrinaForecast(
+			raw_data, dates[0], model_dir, {}, returnActuals=True)
+	expected_times = [date.isoformat() for date in dates[dates.hour == peak_hours][1:-1]]
+	assert actual_times == expected_times, 'Daily peaks must retain their measured timestamps.'
+	assert actual_demands == [100.0] * len(expected_times)
