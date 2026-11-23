@@ -72,7 +72,7 @@ def t_test(df, modelDir, start_date, confidence=0.99, model="neuralNet"):
 	from scipy.stats import t
 	df = df.copy()
 	if model == "neuralNet":
-		df["dates"] = pd.date_range(start_date, freq="H", periods = df.shape[0])
+		df["dates"] = pd.date_range(start_date, freq="h", periods = df.shape[0])
 		df.columns = ["load", "tempc", "dates"]
 		all_X = omf.forecast.makeUsefulDf(df)
 		actual = df["load"].values
@@ -96,7 +96,7 @@ def percent_error(df, modelDir, start_date, p_error=0.05, model="neuralNet"):
 	"""Is given a dataframe of demand, temp, and dates (in that order)"""
 	df = df.copy()
 	if model == "neuralNet":
-		df["dates"] = pd.date_range(start_date, freq="H", periods = df.shape[0])
+		df["dates"] = pd.date_range(start_date, freq="h", periods = df.shape[0])
 		df.columns = ["load", "tempc", "dates"]
 		all_X = omf.forecast.makeUsefulDf(df)
 		actual = df["load"].values

@@ -96,7 +96,7 @@ def workProphet(modelDir, inputDict):
 
 		# add our boy for prophet
 	df["ds"] = pd.date_range(
-		start=inputDict["startDate"], freq="H", periods=df.shape[0]
+		start=inputDict["startDate"], freq="h", periods=df.shape[0]
 	)
 
 	prophet_df = anomalyDetection.prophet(

@@ -70,7 +70,7 @@ def work(modelDir, inputDict):
 	sim_df = results_df.loc[start:end]
 	simLengthUnits = inputDict['simLengthUnits']
 	if simLengthUnits == "minutes":
-			freq = "t"
+			freq = "min"
 	elif simLengthUnits == "hours":
 			freq = "h"
 	elif simLengthUnits == "days":
